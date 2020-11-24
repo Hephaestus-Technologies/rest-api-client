@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ESNext",
+    "outDir": ".bin",
+    "declaration": true,
+    "sourceMap": true
+  },
+  "exclude": [
+    "node_modules"
+  ],
+  "compileOnSave": true
+}
