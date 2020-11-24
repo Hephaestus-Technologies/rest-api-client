@@ -37,7 +37,7 @@ export default class RestApiClient {
     public get<T>(url: string, data: {} = null, credentials: Credentials = null): Promise<T> {
         return this._sendRequest({
             method: "GET",
-            url: url + data ? `?${qs.stringify(data)}` : "",
+            url: url + (data ? `?${qs.stringify(data)}` : ""),
             credentials
         });
     }
