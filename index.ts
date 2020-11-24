@@ -20,7 +20,7 @@ export default class RestApiClient {
         this._hostname = hostname;
     }
 
-    public get<T>(url: string, data: {}, credentials: Credentials = null): Promise<T> {
+    public get<T>(url: string, data: {} = null, credentials: Credentials = null): Promise<T> {
         return this._sendRequest({
             method: "GET",
             url: url + data ? `?${qs.stringify(data)}` : "",
@@ -46,11 +46,10 @@ export default class RestApiClient {
         });
     }
 
-    public delete<T>(url: string, data: {}, credentials: Credentials = null): Promise<T> {
+    public delete<T>(url: string, data: {} = null, credentials: Credentials = null): Promise<T> {
         return this._sendRequest({
             method: "DELETE",
-            url,
-            data,
+            url: url + data ? `?${qs.stringify(data)}` : "",
             credentials
         });
     }
@@ -73,7 +72,7 @@ export default class RestApiClient {
                 res.on("data", (buf) => resolve(JSON.parse(buf.toString())));
             });
             req.on("error", reject);
-            req.write(config.data);
+            if (config.data) req.write(config.data);
             req.end();
         });
     }
