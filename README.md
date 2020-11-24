@@ -1,12 +1,18 @@
-###Boilerplate for an Express server
+###REST API Client
 
-Pass an object to the constructor containing three values:
-- `port:integer` - The port to run on
-- `assets:string[]` - a list of directories within the client that should be served by the same names
-- `clientName:string` - the name of the node module that is the client
+Just a basic REST client for GET/POST/PUT/DELETE
 
-The app assumes the client will have a `\stylesheets` directory that will contain the client's stylesheets.
+Usage:
+```JavaScript
+  const restClient = new RestApiClient("hostname.com");
+  const result = await restClient.get("some/path", {pageLength: 10});
+```
 
-The app assumes the initial HTML will be contained in the file `\index.html`.
+Data passed to `get()` or `delete()` will automatically be converted to a query string.
+Data passed to `post()` or `put` will be sent in the body;
 
-The app assumes the initial JavaScript module that should run immediately after the HTML body is loaded.
+All methods take optional credentials as a third parameter.
+Pass a string for a bearer token. Pass `{username: string, password: string}` for basic auth.
+Pass `null` for no auth. Default is `null`.
+
+Url encoded form posts can be sent with `restClient.postForm()`.
