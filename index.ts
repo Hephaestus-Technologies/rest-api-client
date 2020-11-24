@@ -98,7 +98,7 @@ export default class RestApiClient {
         return {
             ...config,
             hostname: this.hostname,
-            path: RestApiClient._trim(`${this.urlPrefix}/${config.url}`),
+            path: "/" + RestApiClient._trim(`${this.urlPrefix}/${config.url}`),
             method: config.method,
             headers: {
                 "Content-Type": "application/json",
