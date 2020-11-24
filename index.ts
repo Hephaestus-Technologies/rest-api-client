@@ -1,6 +1,7 @@
 import * as qs from "querystring";
 import * as https from "https";
 import {RequestOptions} from "https";
+import {OutgoingHttpHeaders} from "http";
 
 export interface BasicCredentials {
     username: string,
@@ -11,14 +12,27 @@ export type TokenCredentials = string;
 
 export type Credentials = BasicCredentials | TokenCredentials | null;
 
+interface RequestConfig {
+
+    method: "GET" | "POST" | "PUT" |  "DELETE";
+
+    url: string;
+
+    data?: any;
+
+    credentials?: Credentials;
+
+    headers?: OutgoingHttpHeaders | null
+
+}
+
 // noinspection JSUnusedGlobalSymbols
 export default class RestApiClient {
 
-    private readonly _hostname: string;
-
-    public constructor(hostname: string) {
-        this._hostname = hostname;
-    }
+    public constructor(
+        private hostname: string,
+        private urlPrefix = ""
+    ) { }
 
     public get<T>(url: string, data: {} = null, credentials: Credentials = null): Promise<T> {
         return this._sendRequest({
@@ -66,7 +80,7 @@ export default class RestApiClient {
         });
     }
 
-    private _sendRequest<T>(config: any): Promise<T> {
+    private _sendRequest<T>(config: RequestConfig): Promise<T> {
         return new Promise((resolve, reject) => {
             let result = "";
             const req = https.request(this._fullOptionsOf(config), (res) => {
@@ -83,8 +97,8 @@ export default class RestApiClient {
     private _fullOptionsOf(config: any): RequestOptions {
         return {
             ...config,
-            hostname: this._hostname,
-            path: config.url,
+            hostname: this.hostname,
+            path: RestApiClient._trim(`${this.urlPrefix}/${config.url}`),
             method: config.method,
             headers: {
                 "Content-Type": "application/json",
@@ -92,6 +106,10 @@ export default class RestApiClient {
                 ...RestApiClient.authOf(config.credentials)
             }
         };
+    }
+
+    private static _trim(url: string): string {
+        return url.split("/").filter(Boolean).join("/");
     }
 
     private static authOf(credentials: BasicCredentials = null): {} {
