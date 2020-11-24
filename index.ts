@@ -49,7 +49,7 @@ export default class RestApiClient {
     public delete<T>(url: string, data: {} = null, credentials: Credentials = null): Promise<T> {
         return this._sendRequest({
             method: "DELETE",
-            url: url + data ? `?${qs.stringify(data)}` : "",
+            url: url + (data ? `?${qs.stringify(data)}` : ""),
             credentials
         });
     }
@@ -68,10 +68,13 @@ export default class RestApiClient {
 
     private _sendRequest<T>(config: any): Promise<T> {
         return new Promise((resolve, reject) => {
+            let result = "";
             const req = https.request(this._fullOptionsOf(config), (res) => {
-                res.on("data", (buf) => resolve(JSON.parse(buf.toString())));
+                res.on("data", (buf) => result += buf.toString());
+                res.on("end", () => resolve(JSON.parse(result)));
             });
             req.on("error", reject);
+            req.on("close", () => req.abort());
             if (config.data) req.write(config.data);
             req.end();
         });
@@ -84,6 +87,7 @@ export default class RestApiClient {
             path: config.url,
             method: config.method,
             headers: {
+                "Content-Type": "application/json",
                 ...config.headers,
                 ...RestApiClient.authOf(config.credentials)
             }
@@ -98,14 +102,14 @@ export default class RestApiClient {
     }
 
     private static _isBasic(credentials: Credentials): credentials is BasicCredentials {
-        const asBasic = credentials as BasicCredentials;
-        return Boolean(asBasic.username) && Boolean(asBasic.password);
+        const basicCreds = credentials as BasicCredentials;
+        return Boolean(basicCreds.username) && Boolean(basicCreds.password);
     }
 
 
     private static _basicAuthOf(credentials: BasicCredentials): {} {
         const str = `${credentials.username}:${credentials.password}`;
-        return {Authorization: "Basic " + Buffer.from(str).toString("base64")};
+        return "Basic " + Buffer.from(str).toString("base64");
     }
 
 }
